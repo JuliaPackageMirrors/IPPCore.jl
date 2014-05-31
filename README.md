@@ -21,6 +21,3 @@ ippcpudescr()           # get the CPU description (for the CPU of the host)
 ippcpufreq()            # estimate the CPU frequence (in MHz). 
                         # The estimated value may depend on the CPU workload.
 ```
-
-For ``IPPCore.loadlib``, the input argument is the library name (*e.g.*, ``libippi``, ``libipps``, etc). Please refer to the [table here](https://software.intel.com/en-us/articles/selecting-the-intel-integrated-performance-primitives-intel-ipp-libraries-needed-by-your) to choose a proper library for your codes.
-
