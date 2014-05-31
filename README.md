@@ -6,8 +6,6 @@ A Julia package that provides core library service to all packages that rely on 
 
 ## Usage
 
-This package provides a few functions for retrieving version information and loading libraries:
-
 ```julia
 using IPPCore
 
