@@ -1,6 +1,6 @@
 module IPPCore
 
-    const libippcore = dlopen("libippcore")
+    const libippcore = "libippcore"
 
     export 
 
@@ -22,7 +22,7 @@ module IPPCore
     end
 
     function ippversion()
-        p = ccall(dlsym(libippcore, :ippGetLibVersion), Ptr{Uint8}, ())
+        p = ccall((:ippGetLibVersion, libippcore), Ptr{Uint8}, ())
         nbytes = sizeof(Cint) * 4 + 4 + sizeof(Ptr{Uint}) * 4
         a = pointer_to_array(p, nbytes)
         buf = IOBuffer(a)
@@ -39,13 +39,13 @@ module IPPCore
 
     typealias IppStatus Cint
     function ippstatus_string(s::Integer)
-        p = ccall(dlsym(libippcore, :ippGetStatusString), Ptr{Uint8}, (IppStatus,), s)
+        p = ccall((:ippGetStatusString, libippcore), Ptr{Uint8}, (IppStatus,), s)
         return bytestring(p)
     end
 
     ## CPU info
 
-    ippcputype() = uint8(ccall(dlsym(libippcore, :ippGetCpuType), Cint, ()))
+    ippcputype() = uint8(ccall((:ippGetCpuType, libippcore), Cint, ()))
 
     const cpudescrmap = (Uint8=>ASCIIString)[
         0x00 => "Unknown CPU",
@@ -95,7 +95,7 @@ module IPPCore
 
     function ippcpufreq()  # in terms of Mhz
         r = Cint[0]
-        ccall(dlsym(libippcore, :ippGetCpuFreqMhz), IppStatus, (Ptr{Int64},), pointer(r))
+        ccall((:ippGetCpuFreqMhz, libippcore), IppStatus, (Ptr{Int64},), pointer(r))
         return int(r[1])
     end
 
