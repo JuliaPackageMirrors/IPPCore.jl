@@ -4,9 +4,16 @@ module IPPCore
 
     export 
 
+    IppInt, ippint, 
     IppVersion, ippversion, 
     IppStatus, ippstatus_string,
     ippcputype, ippcpudescr, ippcpufreq
+
+
+    # common types
+
+    typealias IppInt Cint
+    ippint(x) = convert(IppInt, x)
 
     ## Get version
 
@@ -23,21 +30,21 @@ module IPPCore
 
     function ippversion()
         p = ccall((:ippGetLibVersion, libippcore), Ptr{Uint8}, ())
-        nbytes = sizeof(Cint) * 4 + 4 + sizeof(Ptr{Uint}) * 4
+        nbytes = sizeof(IppInt) * 4 + 4 + sizeof(Ptr{Uint}) * 4
         a = pointer_to_array(p, nbytes)
         buf = IOBuffer(a)
 
-        major = int(read(buf, Cint))
-        minor = int(read(buf, Cint))
-        majorBuild = int(read(buf, Cint))
-        build = int(read(buf, Cint))
+        major = int(read(buf, IppInt))
+        minor = int(read(buf, IppInt))
+        majorBuild = int(read(buf, IppInt))
+        build = int(read(buf, IppInt))
 
         return IppVersion(major, minor, majorBuild, build)  
     end
 
     ## Status string
 
-    typealias IppStatus Cint
+    typealias IppStatus IppInt
     function ippstatus_string(s::Integer)
         p = ccall((:ippGetStatusString, libippcore), Ptr{Uint8}, (IppStatus,), s)
         return bytestring(p)
@@ -45,7 +52,7 @@ module IPPCore
 
     ## CPU info
 
-    ippcputype() = uint8(ccall((:ippGetCpuType, libippcore), Cint, ()))
+    ippcputype() = uint8(ccall((:ippGetCpuType, libippcore), IppInt, ()))
 
     const cpudescrmap = (Uint8=>ASCIIString)[
         0x00 => "Unknown CPU",
@@ -94,7 +101,7 @@ module IPPCore
     ippcpudescr() = ippcpudescr(ippcputype())
 
     function ippcpufreq()  # in terms of Mhz
-        r = Cint[0]
+        r = IppInt[0]
         ccall((:ippGetCpuFreqMhz, libippcore), IppStatus, (Ptr{Int64},), pointer(r))
         return int(r[1])
     end
