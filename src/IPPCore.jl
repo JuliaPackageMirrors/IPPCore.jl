@@ -2,49 +2,104 @@ module IPPCore
 
     const libippcore = "libippcore"
 
-    export 
-
-    IPPInt,     ippint,
-    IPP16s,     ipp16s, 
-    IPP32s,     ipp32s, 
-    IPP16f,     ipp16f, 
-    IPP32f,     ipp32f, 
-    IPP64f,     ipp64f, 
-    IPP16sc,    ipp16sc,
-    IPP32sc,    ipp32sc,
-    IPP16fc,    ipp16fc,
-    IPP32fc,    ipp32fc,
-    IPP64fc,    ipp64fc,
-    IppVersion, ippversion, 
-    IppStatus,  ippstatus_string,
-    ippcputype, ippcpudescr, ippcpufreq
-
+    export  IPPInt,     ippint,
+            IPP8u,      ipp8u,
+            IPP8s,      ipp8s,
+            IPP16u,     ipp16u,
+            IPP16s,     ipp16s,
+            IPP32u,     ipp32u,
+            IPP32s,     ipp32s,
+            IPP16f,     ipp16f,
+            IPP32f,     ipp32f,
+            IPP64f,     ipp64f,
+            IPP16uc,    ipp16uc,
+            IPP16sc,    ipp16sc,
+            IPP32uc,    ipp32uc,
+            IPP32sc,    ipp32sc,
+            IPP16fc,    ipp16fc,
+            IPP32fc,    ipp32fc,
+            IPP64fc,    ipp64fc,
+            IPPSuffix,  IPPTypeSignature,
+            IppVersion, ippversion,
+            IppStatus,  ippstatus_string,
+            ippcputype, ippcpudescr, ippcpufreq
 
     # common types
 
     typealias IPPInt    Cint
+    typealias IPP8u     Uint8
+    typealias IPP8s     Int8
+    typealias IPP16u    Uint16
     typealias IPP16s    Int16
+    typealias IPP32u    Uint32
     typealias IPP32s    Int32
     typealias IPP16f    Float16
     typealias IPP32f    Float32
     typealias IPP64f    Float64
+    typealias IPP16uc   Complex{Uint16}
     typealias IPP16sc   Complex{Int16}
+    typealias IPP32uc   Complex{Uint32}
     typealias IPP32sc   Complex{Int32}
     typealias IPP16fc   Complex{Float16}
     typealias IPP32fc   Complex{Float32}
     typealias IPP64fc   Complex{Float64}
 
     ippint( x )  = convert( IPPInt, x )
-    ipp16s( x )  = convert( IPP16s, x ) 
-    ipp32s( x )  = convert( IPP32s, x ) 
-    ipp16f( x )  = convert( IPP16f, x ) 
-    ipp32f( x )  = convert( IPP32f, x ) 
-    ipp64f( x )  = convert( IPP64f, x ) 
+    ipp8u( x )   = convert( IPP8u, x )
+    ipp8s( x )   = convert( IPP8s, x )
+    ipp16u( x )  = convert( IPP16u, x )
+    ipp16s( x )  = convert( IPP16s, x )
+    ipp32u( x )  = convert( IPP32u, x )
+    ipp32s( x )  = convert( IPP32s, x )
+    ipp16f( x )  = convert( IPP16f, x )
+    ipp32f( x )  = convert( IPP32f, x )
+    ipp64f( x )  = convert( IPP64f, x )
+    ipp16uc( x ) = convert( IPP16uc, x )
     ipp16sc( x ) = convert( IPP16sc, x )
+    ipp32uc( x ) = convert( IPP32uc, x )
     ipp32sc( x ) = convert( IPP32sc, x )
     ipp16fc( x ) = convert( IPP16fc, x )
     ipp32fc( x ) = convert( IPP32fc, x )
     ipp64fc( x ) = convert( IPP64fc, x )
+
+    IPPTypeDict = [ IPP8u   => "8u",
+                    IPP8s   => "8s",
+                    IPP16u  => "16u",
+                    IPP16s  => "16s",
+                    IPP32u  => "32u",
+                    IPP32s  => "32s",
+                    IPP16f  => "16f",
+                    IPP32f  => "32f",
+                    IPP64f  => "64f",
+                    IPP16uc => "16uc",
+                    IPP16sc => "16sc",
+                    IPP32uc => "32uc",
+                    IPP32sc => "32sc",
+                    IPP16fc => "16fc",
+                    IPP32fc => "32fc",
+                    IPP64fc => "64fc" ]
+
+    function IPPTypeSignature( IPPType )
+        IPPTypeDict[ eval( IPPType ) ]
+    end
+
+    function IPPSuffix( IPPType )
+       string( "_", IPPTypeSignature( IPPType ))
+    end
+
+    function IPPSuffix( IPPTypes::Tuple )
+        lenTypes = length( IPPTypes )
+        lenTypes == 0 && return ""
+        lenTypes == 1 && return IPPSuffix( IPPTypes[1] )
+
+        suffix = IPPTypeSignature( IPPTypes[1] )
+        for Tsymb in IPPTypes[2:end]
+            suffix *= IPPSuffix( Tsymb )
+        end
+
+        suffix
+    end
+
 
     ## Get version
 
@@ -70,7 +125,7 @@ module IPPCore
         majorBuild = int(read(buf, IPPInt))
         build = int(read(buf, IPPInt))
 
-        return IppVersion(major, minor, majorBuild, build)  
+        return IppVersion(major, minor, majorBuild, build)
     end
 
     ## Status string
@@ -120,7 +175,7 @@ module IPPCore
         0x4b => "Processor supports ADCX and ADOX instructions",
         0x60 => "Processor supports 64 bit extension"]
 
-    function ippcpudescr(i::Uint8) 
+    function ippcpudescr(i::Uint8)
         if haskey(cpudescrmap, i)
             return cpudescrmap[i]
         else
